@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Bias in Langauage Models Explained">
+    <meta name="author" content="Tamara Lottering">
+    <title>Runaway Models</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+
+        <!-- Bootstrap core CSS -->
+    <link href="./assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="styles.css" rel="stylesheet">
+    <style>
+
+
+
+.cd-intro {
+  /*width: 90%;*/
+  /*max-width: 768px;*/
+  /*text-align: center;*/
+}
+
+.cd-intro {
+  margin: 4em auto;
+}
+@media only screen and (min-width: 768px) {
+  .cd-intro {
+    margin: 5em auto;
+  }
+}
+@media only screen and (min-width: 1170px) {
+  .cd-intro {
+    margin: 6em auto;
+  }
+}
+
+.cd-headline {
+  font-size: 84px;
+  line-height: 1.2;
+  font-weight: 300;
+}
+/*@media only screen and (min-width: 768px) {
+  .cd-headline {
+    font-size: 2rem;
+    font-weight: 300;
+  }
+}
+@media only screen and (min-width: 1170px) {
+  .cd-headline {
+    font-size: 6rem;
+  }
+}
+*/
+.no-italics {
+    font-style: normal;   
+}
+.cd-words-wrapper {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+}
+.cd-words-wrapper i {
+    font-style: normal;   
+}
+.cd-words-wrapper b {
+  display: inline-block;
+  position: absolute;
+  white-space: nowrap;
+  left: 0;
+  top: 0;
+}
+.cd-words-wrapper b.is-visible {
+  position: relative;
+}
+.no-js .cd-words-wrapper b {
+  opacity: 0;
+}
+.no-js .cd-words-wrapper b.is-visible {
+  opacity: 1;
+}
+
+
+/* -------------------------------- 
+
+xtype 
+
+-------------------------------- */
+.cd-headline.type .cd-words-wrapper {
+  vertical-align: top;
+  overflow: hidden;
+}
+.cd-headline.type .cd-words-wrapper::after {
+  /* vertical pulsating cursor bar */
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  bottom: auto;
+  -webkit-transform: translateY(-50%);
+  -moz-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
+  transform: translateY(-50%);
+  height: 90%;
+  width: 1px;
+  background-color: #ffb91d;
+}
+.cd-headline.type .cd-words-wrapper.waiting::after {
+  -webkit-animation: cd-pulse 1s infinite;
+  -moz-animation: cd-pulse 1s infinite;
+  animation: cd-pulse 1s infinite;
+}
+.cd-headline.type .cd-words-wrapper.selected {
+  background-color: #aebcb9;
+}
+.cd-headline.type .cd-words-wrapper.selected::after {
+  visibility: hidden;
+}
+.cd-headline.type .cd-words-wrapper.selected b {
+  color: #0d0d0d;
+}
+.cd-headline.type b {
+  visibility: hidden;
+}
+.cd-headline.type b.is-visible {
+  visibility: visible;
+}
+.cd-headline.type i {
+  position: absolute;
+  visibility: hidden;
+}
+.cd-headline.type i.in {
+  position: relative;
+  visibility: visible;
+}
+
+@-webkit-keyframes cd-pulse {
+  0% {
+    -webkit-transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+  40% {
+    -webkit-transform: translateY(-50%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateY(-50%) scale(0);
+    opacity: 0;
+  }
+}
+@-moz-keyframes cd-pulse {
+  0% {
+    -moz-transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+  40% {
+    -moz-transform: translateY(-50%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    -moz-transform: translateY(-50%) scale(0);
+    opacity: 0;
+  }
+}
+@keyframes cd-pulse {
+  0% {
+    -webkit-transform: translateY(-50%) scale(1);
+    -moz-transform: translateY(-50%) scale(1);
+    -ms-transform: translateY(-50%) scale(1);
+    -o-transform: translateY(-50%) scale(1);
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+  40% {
+    -webkit-transform: translateY(-50%) scale(0.9);
+    -moz-transform: translateY(-50%) scale(0.9);
+    -ms-transform: translateY(-50%) scale(0.9);
+    -o-transform: translateY(-50%) scale(0.9);
+    transform: translateY(-50%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateY(-50%) scale(0);
+    -moz-transform: translateY(-50%) scale(0);
+    -ms-transform: translateY(-50%) scale(0);
+    -o-transform: translateY(-50%) scale(0);
+    transform: translateY(-50%) scale(0);
+    opacity: 0;
+  }
+}
+
+
+
+
+
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+
+
+    <script type="text/javascript">
+
+      jQuery(document).ready(function($){
+  //set animation timing
+  var animationDelay = 1000,
+    //loading bar effect
+    barAnimationDelay = 3800,
+    barWaiting = barAnimationDelay - 3000, //3000 is the duration of the transition on the loading bar - set in the scss/css file
+    //letters effect
+    lettersDelay = 50,
+    //type effect
+    typeLettersDelay = 50,
+    selectionDuration = 500,
+    typeAnimationDelay = selectionDuration + 300,
+    //clip effect 
+    revealDuration = 600,
+    revealAnimationDelay = 500;
+  
+  initHeadline();
+  
+
+  function initHeadline() {
+    //insert <i> element for each letter of a changing word
+    singleLetters($('.cd-headline.letters').find('b'));
+    //initialise headline animation
+    animateHeadline($('.cd-headline'));
+  }
+
+  function singleLetters($words) {
+    $words.each(function(){
+      var word = $(this),
+        letters = word.text().split(''),
+        selected = word.hasClass('is-visible');
+      for (i in letters) {
+    
+        letters[i] = (selected) ? '<i class="in no-italics">' + letters[i] + '</i>': '<i>' + letters[i] + '</i>';
+      }
+        var newLetters = letters.join('');
+        word.html(newLetters).css('opacity', 1);
+    });
+  }
+
+  function animateHeadline($headlines) {
+    var duration = animationDelay;
+    $headlines.each(function(){
+      var headline = $(this);
+      
+       if (!headline.hasClass('type') ) {
+        //assign to .cd-words-wrapper the width of its longest word
+        var words = headline.find('.cd-words-wrapper b'),
+          width = 0;
+        words.each(function(){
+          var wordWidth = $(this).width();
+            if (wordWidth > width) width = wordWidth;
+        });
+        headline.find('.cd-words-wrapper').css('width', width);
+      };
+
+      //trigger animation
+      setTimeout(function(){ hideWord( headline.find('.is-visible').eq(0) ) }, duration);
+    });
+  }
+
+  function hideWord($word) {
+    var nextWord = takeNext($word);
+    
+    if($word.parents('.cd-headline').hasClass('type')) {
+      var parentSpan = $word.parent('.cd-words-wrapper');
+      parentSpan.addClass('selected').removeClass('waiting'); 
+      setTimeout(function(){ 
+        parentSpan.removeClass('selected'); 
+        $word.removeClass('is-visible').addClass('is-hidden').children('i').removeClass('in').addClass('out');
+      }, selectionDuration);
+      setTimeout(function(){ showWord(nextWord, typeLettersDelay) }, typeAnimationDelay);
+    
+    } else if($word.parents('.cd-headline').hasClass('letters')) {
+      var bool = ($word.children('i').length >= nextWord.children('i').length) ? true : false;
+      hideLetter($word.find('i').eq(0), $word, bool, lettersDelay);
+      showLetter(nextWord.find('i').eq(0), nextWord, bool, lettersDelay);
+
+    }  else if($word.parents('.cd-headline').hasClass('clip')) {
+      $word.parents('.cd-words-wrapper').animate({ width : '2px' }, revealDuration, function(){
+        switchWord($word, nextWord);
+        showWord(nextWord);
+      });
+
+    } else {
+      switchWord($word, nextWord);
+      setTimeout(function(){ hideWord(nextWord) }, animationDelay);
+    }
+  }
+
+  function showWord($word, $duration) {
+    if($word.parents('.cd-headline').hasClass('type')) {
+      showLetter($word.find('i').eq(0), $word, false, $duration);
+      $word.addClass('is-visible').removeClass('is-hidden');
+
+    }  else if($word.parents('.cd-headline').hasClass('clip')) {
+      $word.parents('.cd-words-wrapper').animate({ 'width' : $word.width() + 10 }, revealDuration, function(){ 
+        setTimeout(function(){ hideWord($word) }, revealAnimationDelay); 
+      });
+    }
+  }
+
+  function hideLetter($letter, $word, $bool, $duration) {
+    $letter.removeClass('in').addClass('out');
+    
+    if(!$letter.is(':last-child')) {
+      setTimeout(function(){ hideLetter($letter.next(), $word, $bool, $duration); }, $duration);  
+    } else if($bool) { 
+      setTimeout(function(){ hideWord(takeNext($word)) }, animationDelay);
+    }
+
+    if($letter.is(':last-child') && $('html').hasClass('no-csstransitions')) {
+      var nextWord = takeNext($word);
+      switchWord($word, nextWord);
+    } 
+  }
+
+  function showLetter($letter, $word, $bool, $duration) {
+    $letter.addClass('in').removeClass('out');
+    
+    if(!$letter.is(':last-child')) { 
+      setTimeout(function(){ showLetter($letter.next(), $word, $bool, $duration); }, $duration); 
+    } else { 
+      if($word.parents('.cd-headline').hasClass('type')) { setTimeout(function(){ $word.parents('.cd-words-wrapper').addClass('waiting'); }, 200);}
+      if(!$bool) { setTimeout(function(){ hideWord($word) }, animationDelay) }
+    }
+  }
+
+  function takeNext($word) {
+    return (!$word.is(':last-child')) ? $word.next() : $word.parent().children().eq(0);
+  }
+
+  function takePrev($word) {
+    return (!$word.is(':first-child')) ? $word.prev() : $word.parent().children().last();
+  }
+
+  function switchWord($oldWord, $newWord) {
+    $oldWord.removeClass('is-visible').addClass('is-hidden');
+    $newWord.removeClass('is-hidden').addClass('is-visible');
+  }
+});
+
+
+
+  </script>
+
+
+
+
+  </head>
+  <body class="">
+    <div class="container ">
+
+<section class="min-vh-100" style="display: flex; align-items: center;">
+       <div class="row">
+          <div class="col-md-12">
+
+            <img src="./svgs/logo2.svg" alt="" style="width:400px;" />
+<div class="cd-intro">
+    <h1 class="cd-headline letters type">
+      <span></span> 
+      <span class="cd-words-wrapper waiting">
+        <b class="is-visible">Hey Alexa, Tell me a story</b>
+        <b>OK Google, Tell me a story</b>
+        <b>Hey Siri, Tell me a story</b>
+      </span>
+    </h1>
+  </div>
+
+  <p class="para20">
+    <a href="#letsgo" class="mylink">Scroll down ↓</a>
+  </p>
+
+          </div>
+        </div>
+
+</section>
+<section id="letsgo" class="min-vh-100">
+       <div class="row" style="padding-top: 100px;">
+          <div class="col-md-6">
+             <div class="box-me-1" style="margin-top: 100px;">
+                <p class="para20">
+                   Click ‘Explore’ to follow how text data travels through the Language Modelling pipeline. Language Models are used to power virtual assistants like Alexa.
+                </p>
+
+                <p class="para20">
+                   You will learn about all the stages where human biases can be unintentionally learned, propagated and amplified by these Language Models, and how thes biases can be mitigated.
+                </p>
+
+                <a href="story.html" class="rmbutton-pink">Explore</a>
+                
+
+             </div>
+
+          </div>
+
+          <div class="col-md-6">
+            <img src="./svgs/factory.png" alt="" style="width:100%; margin-top: 150px;" />
+          </div>
+        </div>
+
+
+</section>
+
+    </div>
+
+
+
+
+    <script src="./assets/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src=""></script> -->
+  </body>
+</html>

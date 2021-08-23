@@ -1,0 +1,218 @@
+
+      body {
+        font-family: "Space Grotesk", serif;
+        background: #FAE7D9;
+        color: #B55768;
+        scroll-behavior: smooth;
+      }
+
+      p {
+        color: black;
+        font-family: 'Inter', 'Space Grotesk', Helvetica, sans-serif;
+      }
+
+      .mylink {
+        color: #B55768;
+        text-decoration: none;
+        font-size: 32px;
+      }
+
+      .mylink:hover {
+        color: #B55768;
+        text-decoration: none;
+        font-size: 32px;
+        opacity: .8;
+      }
+
+      .container {
+        padding-left: 100px;
+        padding-right: 100px;
+    z-index: 999;
+    position: relative;
+      }
+
+      .para12 {
+        font-size: 12px;
+      }
+
+      .para14 {
+        font-size: 14px;
+      }
+
+      .para16 {
+        font-size: 16px;
+      }
+
+      .para20 {
+        font-size: 20px;
+      }
+
+      .rm-header {
+        text-align: center;
+        margin: 60px;
+    z-index: 999;
+    position: relative;
+      }
+
+      .box-me-1 {
+        background-color: white;
+        padding: 60px;
+      }
+
+      .box-me-2 {
+        padding: 60px;
+      }
+
+
+
+
+
+
+
+
+
+
+/* BUTTONS */
+
+
+
+
+
+
+
+
+
+
+.rmbutton-pink {
+	font-size: 20px;
+	font-weight: bold;
+	padding: 16px 24px;
+	border-radius: 4px;
+	color: white;
+	text-decoration: none;
+    cursor: pointer;
+    background-color: #FE5C7B;
+
+    display: inline-block; /*this is it*/
+    margin-top: 8px;
+    min-width: 200px;
+    text-align: center;
+
+}
+.rmbutton-pink:hover {
+	color: white;
+	opacity: 0.8;
+}
+
+
+.rmbutton-orange {
+	font-size: 20px;
+	font-weight: bold;
+	padding: 16px 24px;
+	border-radius: 4px;
+	color: white;
+	text-decoration: none;
+    cursor: pointer;
+    background-color: #FF7D34;
+
+    display: inline-block; /*this is it*/
+    margin-top: 8px;
+    min-width: 200px;
+    text-align: center;
+
+}
+.rmbutton-orange:hover {
+	color: white;
+	opacity: 0.8;
+}
+
+
+.btn-hover {
+    width: 200px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    height: 55px;
+    text-align:center;
+    border: none;
+    background-size: 300% 100%;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+    text-transform: uppercase;
+    border-radius: 8px;
+}
+
+.btn-hover:hover {
+    background-position: 100% 0;
+    moz-transition: all .4s ease-in-out;
+    -o-transition: all .4s ease-in-out;
+    -webkit-transition: all .4s ease-in-out;
+    transition: all .4s ease-in-out;
+}
+
+.btn-hover:focus {
+    outline: none;
+}
+
+.btn-hover.color-1 {
+    background-image: linear-gradient(to right, #25aae1, #40e495, #30dd8a, #2bb673);
+}
+.btn-hover.color-2 {
+    background-image: linear-gradient(to right, #f5ce62, #e43603, #fa7199, #e85a19);
+}
+.btn-hover.color-3 {
+    background-image: linear-gradient(to right, #667eea, #764ba2, #6B8DD6, #8E37D7);
+}
+.btn-hover.color-4 {
+    background-image: linear-gradient(to right, #fc6076, #ff9a44, #ef9d43, #e75516);
+}
+.btn-hover.color-5 {
+    background-image: linear-gradient(to right, #0ba360, #3cba92, #30dd8a, #2bb673);
+}
+.btn-hover.color-6 {
+    background-image: linear-gradient(to right, #009245, #FCEE21, #00A8C5, #D9E021);
+}
+.btn-hover.color-7 {
+    background-image: linear-gradient(to right, #6253e1, #852D91, #A3A1FF, #F24645);
+}
+.btn-hover.color-8 {
+    background-image: linear-gradient(to right, #29323c, #485563, #2b5876, #4e4376);
+}
+.btn-hover.color-9 {
+    background-image: linear-gradient(to right, #25aae1, #4481eb, #04befe, #3f86ed);
+}
+.btn-hover.color-10 {
+    background-image: linear-gradient(to right, #ed6ea0, #ec8c69, #f7186a , #FBB03B);
+}
+.btn-hover.color-11 {
+       background-image: linear-gradient(to right, #eb3941, #f15e64, #e14e53, #e2373f);  box-shadow: 0 5px 15px rgba(242, 97, 103, .4);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* MODALS */
+
+
+
+
+
+
+
+
