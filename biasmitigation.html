@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Bias in Langauage Models Explained">
+    <meta name="author" content="Tamara Lottering">
+    <title>Runaway Models</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+        <!-- Bootstrap core CSS -->
+    <link href="./assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="styles.css" rel="stylesheet">
+    <style>
+
+      .spacer-500 {
+        margin-top: 500px;
+      }
+
+      .spacer-1000 {
+        margin-top: 1000px;
+      }
+
+      .spacer-1300 {
+        margin-top: 1300px;
+      }
+
+      .spacer-1500 {
+        margin-top: 1500px;
+      }
+
+      .spacer-1700 {
+        margin-top: 1700px;
+      }
+
+      .spacer-2000 {
+        margin-top: 2000px;
+      }
+
+
+  .amsg {
+    opacity: 0;
+    -webkit-transform: translateY(40px);
+       -moz-transform: translateY(40px);
+        -ms-transform: translateY(40px);
+         -o-transform: translateY(40px);
+            transform: translateY(40px);
+    -webkit-transition: all 0.6s ease-out;
+       -moz-transition: all 0.6s ease-out;
+        -ms-transition: all 0.6s ease-out;
+         -o-transition: all 0.6s ease-out;
+            transition: all 0.6s ease-out;
+  }
+  .amsg.visible {
+    opacity: 1;
+    -webkit-transform: none;
+       -moz-transform: none;
+        -ms-transform: none;
+         -o-transform: none;
+            transform: none;
+  }
+  .amsg:nth-child(2) {
+    margin-top: 2px;
+  }
+  .amsg:nth-child(3) {
+    margin-top: 2px;
+  }
+  .amsg:nth-child(4) {
+    margin-top: 2px;
+  }
+  .amsg:nth-child(5) {
+    margin-top: 2px;
+  }
+  .amsg:nth-child(6) {
+    margin-top: 2px;
+  }
+
+  .dotted:after {
+    content:"";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    height: 100%;
+    height: inherit;
+    border-left: 2px dotted lightgrey;
+}
+
+.line {   
+    margin-top: 200px;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    height: 39000px;
+    width: 1px;
+    border-left: 4px dashed #FFC5C1;
+}
+
+
+.mcontainer {
+  width: 30%;
+  height: 500px;
+  /*margin: 0 auto;*/
+}
+
+.tranimation {
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  width: 405px;
+  min-height: 60px;
+  background-color: #fff;
+  text-align: center;
+  color: #333;
+  border-radius: 4px;
+  padding-top: 16px;
+  margin-top: 4px;
+  border: 4px dashed #E8AB0E;
+}
+
+.pretraining {
+  top: 150px;
+  position: absolute;
+  padding-bottom: 20px;
+}
+
+.pgpt3 {
+  border: 0px;
+  width: 300px;
+  left: 50px;
+  background-color: #B55768;
+  position: absolute;
+  top: 220px;
+  color:  white;
+}
+.ugpt3 {
+  color:  white;
+  background-color: #E8AB0E;
+  top: 80px;
+  border: 0px;
+  width: 300px;
+  left: 50px;
+  position: absolute;
+}
+
+
+
+
+.gloader {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 40px;
+}
+
+.gicon {
+  width: 60px;
+  height: 60px;
+  fill: #E8AB0E;
+  -webkit-animation: counter-rotation 2.5s infinite linear;
+          animation: counter-rotation 2.5s infinite linear;
+}
+
+.gsmall {
+  width: 37px;
+  height: 37px;
+  -webkit-animation-duration: 2.5s;
+          animation-duration: 2.5s;
+}
+
+.gbig {
+  width: 56px;
+  height: 56px;
+  -webkit-animation-duration: 3.75s;
+          animation-duration: 3.75s;
+  position: relative;
+  left: -25px;
+  top: 56.25px;
+}
+
+@-webkit-keyframes counter-rotation {
+  from {
+    transform: rotate(359deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes counter-rotation {
+  from {
+    transform: rotate(359deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+
+
+
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.1/TweenMax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/ScrollMagic.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/ScrollMagic.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/plugins/ScrollToPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/plugins/animation.gsap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/plugins/debug.addIndicators.min.js"></script>
+
+
+    <script type="text/javascript">
+
+    var controller = new ScrollMagic.Controller();
+
+  </script>
+
+
+
+<script type="text/javascript">
+  
+  $(document).ready(function(){
+    $(".animate9").click(function(){
+        var divu = $(".ugpt3");
+        var divp = $(".pgpt3");
+        divu.animate({marginTop: '300px'}, "slow");
+        divp.animate({marginTop: '280px'}, "slow");
+        // div.animate({marginTop: '100px', opacity: '0.8'}, "slow");
+    });
+    $(".reset9").click(function() {
+        $('.ugpt3').css({marginTop:'4px'});
+        $('.pgpt3').css({marginTop:'100px'});
+    });
+});
+
+</script>
+    
+    <!-- Custom styles for this template -->
+    <link href="styles.css" rel="stylesheet">
+  </head>
+  <body class="">
+   <nav class="navbar sticky-top bg-blur">
+      <div class="container-fluid">
+         <a class="navbar-brand" href="index.html" style="color: #FE5C7B;"><b>Runaway Models</b></a>
+         <span class="navbar-text">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="display: inline-block;">
+               <li class="nav-item" style="display: inline-block;">
+                  <a class="nav-link active" aria-current="page" href="index.html" style="color: #AA0B29;">Home</a>
+               </li>
+               <li class="nav-item" style="display: inline-block; margin-left: 20px;">
+                  <a class="nav-link" href="story.html" style="color: #AA0B29;">Bias Pipeline</a>
+               </li>
+               <li class="nav-item" style="display: inline-block; margin-left: 20px;">
+                  <a class="nav-link" href="biasmitigation.html" style="color: #AA0B29;">Bias Mitigation</a>
+               </li>
+               <li class="nav-item" style="display: inline-block; margin-left: 20px;">
+                  <a class="nav-link" href="about.html" style="color: #AA0B29;">About</a>
+               </li>
+            </ul>
+         </span>
+      </div>
+   </nav>
+   <div class="container ">
+      <!-- 
+         <div class="bgarea" >
+                     <ul class="bgcircles">
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                             <li></li>
+                     </ul>
+             </div >
+          -->
+      <div class="rm-header">
+         <svg width="500" height="500" viewBox="0 0 549 501" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="273.876" cy="250.875" r="250" fill="url(#paint0_linear)"/>
+            <path d="M535.017 345.592L0 361.821L8.72032 168.24L548.354 141L535.017 345.592Z" fill="black" fill-opacity="0.1"/>
+            <path d="M525.945 338.538L8.45239 353.369L16.8871 176.46L538.845 151.566L525.945 338.538Z" fill="black" fill-opacity="0.1"/>
+            <path d="M16.9052 347.029L29.13 182.788L516.658 164.244V325.837L16.9052 347.029Z" fill="white"/>
+            <mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="44" y="195" width="458" height="92">
+               <path fill-rule="evenodd" clip-rule="evenodd" d="M78.8233 286.594L67.8316 253.845H62.9591V286.594H44.3752V208.746L57.8598 195.941H95.8207V253.619H85.7356L97.5204 286.594H78.8233ZM77.2369 213.165H62.9591V236.848H77.2369V213.165ZM158.296 286.594H105.491V195.941H124.301V269.37H139.599V195.941H158.296V286.594ZM202.195 197.981V248.859L184.405 197.981H166.274V286.594H183.385V235.715L201.289 286.594H219.419V197.981H202.195ZM246.54 286.594H227.389V210.332L242.007 195.941H281.668V286.594H262.631V256.792H246.54V286.594ZM262.631 213.165H246.54V239.568H262.631V213.165ZM305.136 286.594H322.36L332.331 230.389L342.303 286.594H359.527L375.052 195.941H356.694L348.649 249.993L338.904 195.941H325.872L316.127 249.993L308.082 195.941H289.611L305.136 286.594ZM397.81 286.594L382.929 286.594V210.332L397.547 195.941H437.207V286.594L424.942 286.594H397.81ZM501.469 195.941H482.092L472.8 224.043L464.301 195.941H445.151L463.735 251.919L452.29 286.594H471.553L501.469 195.941Z" fill="url(#paint1_linear)"/>
+            </mask>
+            <g mask="url(#mask0)">
+               <path fill-rule="evenodd" clip-rule="evenodd" d="M78.8233 286.594L67.8316 253.845H62.9591V286.594H44.3752V208.746L57.8598 195.941H95.8207V253.619H85.7356L97.5204 286.594H78.8233ZM77.2369 213.165H62.9591V236.848H77.2369V213.165ZM158.296 286.594H105.491V195.941H124.301V269.37H139.599V195.941H158.296V286.594ZM202.195 197.981V248.859L184.405 197.981H166.274V286.594H183.385V235.715L201.289 286.594H219.419V197.981H202.195ZM246.54 286.594H227.389V210.332L242.007 195.941H281.668V286.594H262.631V256.792H246.54V286.594ZM262.631 213.165H246.54V239.568H262.631V213.165ZM305.136 286.594H322.36L332.331 230.389L342.303 286.594H359.527L375.052 195.941H356.694L348.649 249.993L338.904 195.941H325.872L316.127 249.993L308.082 195.941H289.611L305.136 286.594ZM397.81 286.594L382.929 286.594V210.332L397.547 195.941H437.207V286.594L424.942 286.594H397.81ZM501.469 195.941H482.092L472.8 224.043L464.301 195.941H445.151L463.735 251.919L452.29 286.594H471.553L501.469 195.941Z" fill="#FE5C7B"/>
+               <circle cx="409.945" cy="223.412" r="9.50903" fill="white"/>
+               <path d="M417.87 266.202V243.486L414.172 244.542L402.549 255.636L417.87 266.202Z" fill="#A23A00"/>
+               <path d="M404.662 248.241V238.204L408.888 239.261L413.114 240.845V246.657L404.662 248.241Z" fill="#A23A00"/>
+               <path d="M388.391 283.635V256.165H389.448L402.655 269.372L388.391 283.635Z" fill="#A23A00"/>
+               <path d="M404.662 247.713C417.763 243.064 410.121 239.437 404.662 238.204C411.882 239.085 423.891 242.219 414.171 247.713C402.021 254.581 402.549 256.166 425.265 263.033C443.438 268.527 449.037 284.693 449.566 292.089L342.325 306.88C365.393 296.843 408.571 274.55 396.738 265.675C381.946 254.581 388.285 253.524 404.662 247.713Z" fill="white"/>
+            </g>
+            <path d="M44.3752 301.878V322.437H48.5987V309.006H48.7697L54.0993 322.337H56.9753L62.305 309.056H62.4759V322.437H66.6994V301.878H61.3296L55.658 315.691H55.4167L49.7451 301.878H44.3752Z" fill="#FE5C7B"/>
+            <path d="M100.539 312.158C100.539 305.432 96.3559 301.597 90.8955 301.597C85.405 301.597 81.2519 305.432 81.2519 312.158C81.2519 318.853 85.405 322.718 90.8955 322.718C96.3559 322.718 100.539 318.884 100.539 312.158ZM96.1246 312.158C96.1246 316.514 94.0531 318.874 90.8955 318.874C87.7279 318.874 85.6664 316.514 85.6664 312.158C85.6664 307.801 87.7279 305.442 90.8955 305.442C94.0531 305.442 96.1246 307.801 96.1246 312.158Z" fill="#FE5C7B"/>
+            <path d="M122.392 322.437C128.667 322.437 132.468 318.562 132.468 312.138C132.468 305.733 128.667 301.878 122.453 301.878H115.092V322.437H122.392ZM119.446 318.713V305.603H122.221C126.083 305.603 128.124 307.57 128.124 312.138C128.124 316.725 126.083 318.713 122.211 318.713H119.446Z" fill="#FE5C7B"/>
+            <path d="M147.021 322.437H160.938V318.853H151.375V313.945H160.184V310.361H151.375V305.462H160.898V301.878H147.021V322.437Z" fill="#FE5C7B"/>
+            <path d="M175.687 322.437H188.87V318.853H180.041V301.878H175.687V322.437Z" fill="#FE5C7B"/>
+            <path d="M214.253 307.791H218.426C218.366 304.127 215.349 301.597 210.763 301.597C206.248 301.597 202.94 304.087 202.96 307.821C202.95 310.853 205.092 312.589 208.571 313.423L210.814 313.985C213.056 314.527 214.303 315.169 214.313 316.555C214.303 318.06 212.875 319.084 210.663 319.084C208.4 319.084 206.771 318.04 206.63 315.982H202.417C202.527 320.43 205.715 322.728 210.713 322.728C215.741 322.728 218.697 320.329 218.707 316.565C218.697 313.142 216.113 311.325 212.533 310.521L210.683 310.08C208.893 309.668 207.395 309.006 207.425 307.53C207.425 306.205 208.601 305.231 210.733 305.231C212.815 305.231 214.092 306.175 214.253 307.791Z" fill="#FE5C7B"/>
+            <path d="M78.8229 286.593L67.8313 253.845H62.9587V286.593H44.3749V208.745L57.8595 195.94H95.8203V253.618H85.7352L97.5201 286.593H78.8229ZM77.2365 213.164H62.9587V236.847H77.2365V213.164Z" fill="#B55768"/>
+            <path d="M158.295 286.593H105.49V195.94H124.301V269.369H139.598V195.94H158.295V286.593Z" fill="#B55768"/>
+            <path d="M202.195 248.859V197.98H219.419V286.593H201.288L183.384 235.714V286.593H166.274V197.98H184.404L202.195 248.859Z" fill="#B55768"/>
+            <defs>
+               <linearGradient id="paint0_linear" x1="131.504" y1="41.7484" x2="380.422" y2="470" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FF7D92"/>
+                  <stop offset="1" stop-color="#FEACA0"/>
+               </linearGradient>
+               <linearGradient id="paint1_linear" x1="272.922" y1="195.941" x2="272.922" y2="286.594" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#E8AB0E"/>
+                  <stop offset="1" stop-color="#E85D0E"/>
+               </linearGradient>
+            </defs>
+         </svg>
+      </div>
+      <div class="row">
+         <div class="col-md-5">
+            <div class="spacer-500"></div>
+            <!-- BOX 1 -->
+            <div id="pin1" class="box-me-1">
+               <h3>Algorithmic Bias in Language Models</h3>
+               <p class="para20">We now know that Language Models unintentionally learn and propagate biases that are inherent to our society based on the data used to train them. More so, runaway feedback loops amplify these biases leading to Algorithmic Bias in AI systems that can reinforce injustices and inequities that are already prevalent in society.</p>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin1", offset: 250, duration: 1000})
+                          .setPin("#pin1")
+                          // .addIndicators({name: "1 (duration: 1000)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+               </script>
+            </div>
+            <div class="spacer-1500"></div>
+            <!-- BOX 3 -->
+            <div id="pin3" class="box-me-2" style="padding:0px">
+               <div style="position: relative; width:90%; margin: 0 auto;">
+                  <img src="./svgs/mb1.svg" alt="" style="display:block; width: 100%; opacity: 0;" id="mb1" />
+                  <img src="./svgs/mb2.svg" alt="" style="display:block; width: 60%; opacity: 0;" id="mb2" />
+                  <img src="./svgs/mb3.svg" alt="" style="display:block; width: 100%; opacity: 0;" id="mb3" />
+                  <img src="./svgs/mb4.svg" alt="" style="display: block; width: 105%; opacity: 0; margin-top: -304px; margin-left: -23px; margin-bottom: 0;" id="mb4" />
+               </div>
+               <script>
+                  $(function () { // wait for document ready
+                  
+                  var timeline = new TimelineMax();
+                  var tween1 = TweenMax.to("#mb1", 1, {opacity: 1});
+                  var tween2 = TweenMax.to("#mb2", 1, {opacity:1, delay:0.4});
+                  var tween3 = TweenMax.to("#mb3", 1, {opacity:1, delay:0.8});
+                  var tween4 = TweenMax.to("#mb4", 1, {opacity:1, delay:1.2});
+                  timeline.add(tween1).add(tween2).add(tween3).add(tween4);
+                  
+                  
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin3", offset: 250, duration: 2500})
+                          .setPin("#pin3")
+                          // .addIndicators({name: "13 (duration: 1300)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  
+                  
+                  scene.setTween(timeline);
+                  
+                  
+                  });
+                  
+                  
+               </script>
+            </div>
+            <div class="spacer-1000"></div>
+            <!-- BOX 5 -->
+            <div id="pin5" class="box-me-1">
+               <p class="para20">Scroll to follow the bubble and see ways to mitigate biases in Language Models and the systems that utilise them.</p>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin5", offset: 250, duration: 1000})
+                          .setPin("#pin5")
+                          // .addIndicators({name: "1 (duration: 1000)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+               </script>
+            </div>
+            <div class="spacer-500"></div>
+            <!-- BOX 6 -->
+            <div id="pin6" class="box-me-1">
+               <h3>Debiasing Data</h3>
+               <p class="para20">
+                  The data used pre-train a Language Model must be representative of all groups. Oversampling underrepresented groups in the data can be applied to create a more balanced training dataset. 
+               </p>
+               <a href="#" data-bs-toggle="modal" data-bs-target="#samplebias" class="rmbutton-pink">Sample Bias</a>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin6", offset: 250, duration: 1500})
+                          .setPin("#pin6")
+                          // .addIndicators({name: "6 (duration: 1500)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-1700"></div>
+            <!-- BOX 9 -->
+            <div id="pin9" class="box-me-1" >
+               <h3>Debiasing Word Embeddings</h3>
+               <p class="para20">
+                  Going back to our gender biased word embeddings example,  the fact that “female” is more closely related to “homemaker” as opposed to “computer programmer” is indicative of gender bias, whereas a close association between “female” and “queen” reflects an appropriate, definitional relationship. Researchers have then used a separate algorithm to neutralize gender association between word pairs exhibiting gender bias before feeding this de-biased data into the Word2Vec embedding algorithm. 
+               </p>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin9", offset: 250, duration: 1300})
+                          .setPin("#pin9")
+                          // .addIndicators({name: "9 (duration: 1300)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-1300"></div>
+            <!-- BOX 10 -->
+            <div id="pin10" class="box-me-1">
+               <h3>Understanding the Context of Data</h3>
+               <p class="para20">
+                  In addition to debiasing data, procedures should be put in place to increase dataset transparency and facilitate better communication between dataset creators and dataset consumers (e.g., those using datasets to train machine learning models). This provides the full context of the dataset: from who collected it, how and why it was collected, to an account of any skews and correlations in it etc. 
+               </p>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin10", offset: 250, duration: 1300})
+                          .setPin("#pin10")
+                          // .addIndicators({name: "10 (duration: 1300)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-1300"></div>
+            <!-- BOX 13 -->
+            <div id="pin13" class="box-me-1">
+               <h3>Curated Datasets</h3>
+               <p class="para20">
+                  Language Model behaviour can be improved with respect to specific behavioral values by fine-tuning on a small, curated dataset.  This way  data scientists can predict the model’s behaviour , similar to running a controlled experiment in a laboratory.
+               </p>
+               <a href="https://www.openai.com/blog/improving-language-model-behavior/" target="_blank" class="rmbutton-orange" style="margin-top: 20px;">Debiasing Word Embeddings</a>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin13", offset: 250, duration: 1300})
+                          .setPin("#pin13")
+                          // .addIndicators({name: "10 (duration: 1300)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+                  
+               </script>
+            </div>
+            <div class="spacer-2000"></div>
+            <!-- BOX 14 -->
+            <div id="pin14" class="box-me-1" style="text-align: center; padding: 20px;">
+               <iframe width="400" height="280" src="https://www.youtube.com/embed/CuRI_VK83dU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+               <a href="https://demo.allennlp.org/reading-comprehension/bidaf-elmo" target="_blank" class="rmbutton-orange" style="margin-top: 20px;">AllenNLP</a>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin14", offset: 250, duration: 2000})
+                          .setPin("#pin14")
+                          // .addIndicators({name: "14 (duration: 2000)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-1300"></div>
+            <!-- BOX 17 -->
+            <div id="pin17" class="box-me-2" style="padding: 0;">
+               <img src="./svgs/policing_final.gif" style="width: 100%;" />
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin17", offset: 250, duration: 2000})
+                          .setPin("#pin17")
+                          // .addIndicators({name: "14 (duration: 2000)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+               </script>
+            </div>
+            <div class="spacer-2000"></div>
+            <!-- BOX 18 -->
+            <div id="pin18" class="box-me-2" style="padding: 0;">
+               <img src="./svgs/table2.svg" alt="" style="width:100%;" />
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin18", offset: 250, duration: 1500})
+                          .setPin("#pin18")
+                          // .addIndicators({name: "18 (duration: 1500)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-2000"></div>
+            <!-- BOX 20 -->
+            <div id="pin20" class="box-me-1">
+               <h3>Fairness in AI</h3>
+               <p class="para20">
+                  After tackling bias directly in the data and/or the Language Model algorithm, large technology companies and other organisations are establishing responsible or ethical AI guidelines, where minimising bias is part of their overarching AI objectives.
+               </p>
+               <a href="https://ai.google/responsibilities/responsible-ai-practices/" target="_blank" class="rmbutton-orange" style="margin-top: 20px;">Google's Responsible AI</a>
+               <a href="https://www.microsoft.com/en-us/ai/responsible-ai?activetab=pivot1:primaryr6" target="_blank" class="rmbutton-orange" style="margin-top: 20px;">Microsoft's Responsible AI</a>
+               <a href="https://hai.stanford.edu/news/new-approach-mitigating-ais-negative-impact" target="_blank" class="rmbutton-orange" style="margin-top: 20px;">Stanford Ethics Board</a>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin20", offset: 250, duration: 3000})
+                          .setPin("#pin20")
+                          // .addIndicators({name: "19 (duration: 2000)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+         </div>
+         <div class="col-md-2">
+            <div class="line"></div>
+            <div id="alexaballtrigger"></div>
+            <div class="alexaball" id="alexaball" style="margin-left: 10px;">
+               <svg width="145" height="145" viewBox="0 0 145 145" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="72.4378" cy="72.4378" r="72.4378" fill="#FFBE21"/>
+                  <circle opacity="0.3" cx="34.0193" cy="30.0197" r="7.04851" transform="rotate(0.779669 34.0193 30.0197)" fill="white"/>
+                  <path opacity="0.3" d="M21.5484 40.4575C16.1515 48.097 7.4257 69.0066 15.6981 91.5284" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M35.6166 61.0909V72H37.8538V64.8729H37.9444L40.7675 71.9467H42.291L45.1141 64.8995H45.2047V72H47.4419V61.0909H44.5974L41.5932 68.4205H41.4653L38.4611 61.0909H35.6166ZM49.2996 72H51.5688V63.8182H49.2996V72ZM50.4395 62.7635C51.116 62.7635 51.67 62.2468 51.67 61.6129C51.67 60.9844 51.116 60.4677 50.4395 60.4677C49.7683 60.4677 49.2144 60.9844 49.2144 61.6129C49.2144 62.2468 49.7683 62.7635 50.4395 62.7635ZM57.7384 63.8182H56.199V61.858H53.9298V63.8182H52.8112V65.5227H53.9298V69.7841C53.9192 71.3874 55.0111 72.1811 56.6571 72.1119C57.243 72.0906 57.6585 71.9734 57.8876 71.8988L57.5307 70.2102C57.4188 70.2315 57.1791 70.2848 56.966 70.2848C56.5133 70.2848 56.199 70.1143 56.199 69.4858V65.5227H57.7384V63.8182ZM59.2166 72H61.4858V63.8182H59.2166V72ZM60.3565 62.7635C61.033 62.7635 61.587 62.2468 61.587 61.6129C61.587 60.9844 61.033 60.4677 60.3565 60.4677C59.6853 60.4677 59.1313 60.9844 59.1313 61.6129C59.1313 62.2468 59.6853 62.7635 60.3565 62.7635ZM66.9896 75.2386C69.328 75.2386 70.9899 74.1733 70.9899 72.0799V63.8182H68.7367V65.1925H68.6515C68.3479 64.5266 67.682 63.7116 66.3131 63.7116C64.518 63.7116 62.9999 65.1072 62.9999 67.8931C62.9999 70.6151 64.4754 71.8828 66.3184 71.8828C67.6234 71.8828 68.3532 71.2276 68.6515 70.5511H68.7474V72.0479C68.7474 73.1719 68.0283 73.6087 67.0428 73.6087C66.0414 73.6087 65.5354 73.1719 65.3489 72.6765L63.2502 72.9588C63.5219 74.2479 64.7843 75.2386 66.9896 75.2386ZM67.0375 70.1783C65.9242 70.1783 65.317 69.294 65.317 67.8825C65.317 66.4922 65.9136 65.5174 67.0375 65.5174C68.1401 65.5174 68.758 66.4496 68.758 67.8825C68.758 69.326 68.1295 70.1783 67.0375 70.1783ZM75.1288 72.1545C76.3379 72.1545 77.121 71.6271 77.5205 70.8654H77.5844V72H79.7364V66.4815C79.7364 64.532 78.0851 63.7116 76.2634 63.7116C74.3031 63.7116 73.0141 64.6491 72.6998 66.1406L74.7985 66.3111C74.953 65.7678 75.4377 65.3683 76.2527 65.3683C77.0251 65.3683 77.4672 65.7571 77.4672 66.4283V66.4602C77.4672 66.9876 76.9079 67.0568 75.4857 67.1953C73.8663 67.3445 72.4122 67.8878 72.4122 69.7148C72.4122 71.3342 73.568 72.1545 75.1288 72.1545ZM75.7786 70.5884C75.0808 70.5884 74.5801 70.2635 74.5801 69.6403C74.5801 69.0011 75.1075 68.6868 75.9065 68.5749C76.4019 68.5057 77.2115 68.3885 77.4832 68.2074V69.0756C77.4832 69.9332 76.7747 70.5884 75.7786 70.5884ZM85.8488 63.8182H84.3093V61.858H82.0402V63.8182H80.9216V65.5227H82.0402V69.7841C82.0295 71.3874 83.1215 72.1811 84.7674 72.1119C85.3534 72.0906 85.7689 71.9734 85.9979 71.8988L85.641 70.2102C85.5292 70.2315 85.2895 70.2848 85.0764 70.2848C84.6236 70.2848 84.3093 70.1143 84.3093 69.4858V65.5227H85.8488V63.8182ZM87.3269 72H89.5961V63.8182H87.3269V72ZM88.4668 62.7635C89.1433 62.7635 89.6973 62.2468 89.6973 61.6129C89.6973 60.9844 89.1433 60.4677 88.4668 60.4677C87.7957 60.4677 87.2417 60.9844 87.2417 61.6129C87.2417 62.2468 87.7957 62.7635 88.4668 62.7635ZM93.683 67.2699C93.6883 66.2152 94.3169 65.5973 95.2331 65.5973C96.144 65.5973 96.6926 66.1939 96.6873 67.1953V72H98.9565V66.7905C98.9565 64.8835 97.8378 63.7116 96.1333 63.7116C94.9188 63.7116 94.0399 64.3082 93.6724 65.2617H93.5765V63.8182H91.4138V72H93.683V67.2699ZM104.431 75.2386C106.769 75.2386 108.431 74.1733 108.431 72.0799V63.8182H106.178V65.1925H106.093C105.789 64.5266 105.123 63.7116 103.754 63.7116C101.959 63.7116 100.441 65.1072 100.441 67.8931C100.441 70.6151 101.917 71.8828 103.76 71.8828C105.065 71.8828 105.795 71.2276 106.093 70.5511H106.189V72.0479C106.189 73.1719 105.47 73.6087 104.484 73.6087C103.483 73.6087 102.977 73.1719 102.79 72.6765L100.692 72.9588C100.963 74.2479 102.226 75.2386 104.431 75.2386ZM104.479 70.1783C103.366 70.1783 102.758 69.294 102.758 67.8825C102.758 66.4922 103.355 65.5174 104.479 65.5174C105.582 65.5174 106.199 66.4496 106.199 67.8825C106.199 69.326 105.571 70.1783 104.479 70.1783ZM57.3842 94H62.0451C64.4953 94 65.8004 92.7216 65.8004 90.9851C65.8004 89.3711 64.6445 88.3963 63.4034 88.3377V88.2312C64.538 87.9755 65.3742 87.1712 65.3742 85.8874C65.3742 84.2521 64.1598 83.0909 61.7521 83.0909H57.3842V94ZM59.6907 92.1143V89.2166H61.6242C62.7322 89.2166 63.4193 89.8558 63.4193 90.756C63.4193 91.5763 62.86 92.1143 61.571 92.1143H59.6907ZM59.6907 87.6559V84.9553H61.4431C62.4659 84.9553 63.0465 85.4826 63.0465 86.271C63.0465 87.1339 62.3434 87.6559 61.4005 87.6559H59.6907ZM67.2586 94H69.5277V85.8182H67.2586V94ZM68.3985 84.7635C69.075 84.7635 69.629 84.2468 69.629 83.6129C69.629 82.9844 69.075 82.4677 68.3985 82.4677C67.7273 82.4677 67.1733 82.9844 67.1733 83.6129C67.1733 84.2468 67.7273 84.7635 68.3985 84.7635ZM73.6786 94.1545C74.8877 94.1545 75.6708 93.6271 76.0703 92.8654H76.1342V94H78.2862V88.4815C78.2862 86.532 76.6349 85.7116 74.8132 85.7116C72.8529 85.7116 71.5639 86.6491 71.2496 88.1406L73.3483 88.3111C73.5028 87.7678 73.9875 87.3683 74.8025 87.3683C75.5749 87.3683 76.017 87.7571 76.017 88.4283V88.4602C76.017 88.9876 75.4577 89.0568 74.0355 89.1953C72.4161 89.3445 70.962 89.8878 70.962 91.7148C70.962 93.3342 72.1179 94.1545 73.6786 94.1545ZM74.3284 92.5884C73.6306 92.5884 73.1299 92.2635 73.1299 91.6403C73.1299 91.0011 73.6573 90.6868 74.4563 90.5749C74.9517 90.5057 75.7613 90.3885 76.033 90.2074V91.0756C76.033 91.9332 75.3245 92.5884 74.3284 92.5884ZM86.8542 88.1513C86.6518 86.6438 85.4373 85.7116 83.3705 85.7116C81.2771 85.7116 79.8975 86.6811 79.9028 88.2578C79.8975 89.483 80.6699 90.2766 82.2679 90.5962L83.6848 90.8786C84.3986 91.0224 84.7235 91.2834 84.7342 91.6935C84.7235 92.1783 84.1962 92.5245 83.4025 92.5245C82.5928 92.5245 82.0548 92.1783 81.9163 91.5124L79.6844 91.6296C79.8975 93.1957 81.2292 94.1598 83.3972 94.1598C85.5172 94.1598 87.0353 93.0785 87.0406 91.4645C87.0353 90.282 86.2629 89.5735 84.6756 89.2486L83.1947 88.9503C82.433 88.7852 82.1507 88.5241 82.156 88.13C82.1507 87.6399 82.7047 87.3203 83.4078 87.3203C84.1962 87.3203 84.6649 87.7518 84.7768 88.2791L86.8542 88.1513Z" fill="white"/>
+               </svg>
+            </div>
+            <script>
+               $(function () { // wait for document ready
+                 // build scene
+                 var scene = new ScrollMagic.Scene({triggerElement: "#alexaballtrigger", offset: 250, duration: 38500})
+                         .setPin("#alexaball")
+                         // .addIndicators({name: "a2 (duration: 34000)"}) // add indicators (requires plugin)
+                         .addTo(controller);
+               });
+            </script>
+         </div>
+         <div class="col-md-5">
+            <div class="spacer-2000"></div>
+            <!-- BOX 2 -->
+            <div id="pin2" class="box-me-1">
+               <h3>Mitigating Bias</h3>
+               <p class="para20">There are ways can we can tackle biases in Language Models: </p>
+               <ul style="color:black; font-size: 20px; font-family: 'Inter', inherit;">
+                  <li>Debiasing Data</li>
+                  <li>Debiasing Algorithms</li>
+                  <li>Debiasing Runaway Feedback Loops</li>
+                  <li>Guidelines for Fair and Inclusive AI.</li>
+               </ul>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin2", offset: 250, duration: 4000})
+                          .setPin("#pin2")
+                          // .addIndicators({name: "2 (duration: 700)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+               </script>
+            </div>
+            <div class="spacer-1700"></div>
+            <!-- BOX 4 -->
+            <div id="pin4" class="box-me-1">
+               <p class="para20">
+                  Click on the yellow buttons to learn more about the various methods to tackle bias in Language Models.
+               </p>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin4", offset: 250, duration: 1000})
+                          .setPin("#pin4")
+                          // .addIndicators({name: "4 (duration: 1000)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-1300"></div>
+            <!-- BOX 7 -->
+            <div id="pin7" class="box-me-1" style="padding: 40px; text-align: center;">
+               <h3 id="adjsample">Original Sample</h3>
+               <div class="row" style="margin-top: 20px;">
+                  <div class="col-md-6">
+                     <img src="svgs/maleeng.svg" alt="" style="width: 100%" />
+                  </div>
+                  <div class="col-md-6">
+                     <img src="svgs/femaleeng0.svg" id="femaleeng" alt="" style="width: 100%" />
+                  </div>
+               </div>
+               <button class="rmbutton-pink" id="balancebtn" style="margin-top: 20px; border: none;" onclick="balanceSamples()">Click to Balance Samples</button>
+               <button class="rmbutton-pink" id="balanceresetbtn" style="margin-top: 20px; border: none; background-color: #333; display: none;" onclick="unbalanceSamples()">Reset</button>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin7", offset: 250, duration: 1500})
+                          .setPin("#pin7")
+                          // .addIndicators({name: "6 (duration: 1500)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  function balanceSamples() {
+                     document.getElementById("adjsample").innerHTML = "Adjusted Sample";
+                     document.getElementById("femaleeng").src = "svgs/femaleeng.svg";
+                     document.getElementById("balancebtn").style.display = "none";
+                     document.getElementById("balanceresetbtn").style.display = "initial";
+                  }
+                  
+                  function unbalanceSamples() {
+                     document.getElementById("adjsample").innerHTML = "Original Sample";
+                     document.getElementById("femaleeng").src = "svgs/femaleeng0.svg";
+                     document.getElementById("balancebtn").style.display = "initial";
+                     document.getElementById("balanceresetbtn").style.display = "none";
+                  }
+               </script>
+            </div>
+            <div class="spacer-1300"></div>
+            <!-- BOX 8 -->
+            <div id="pin8" class="box-me-1" style="padding:0; text-align: center; padding-bottom: 40px;">
+               <img src="svgs/debiasing.gif" alt="" style="width:100%" />
+               <a href="https://arxiv.org/abs/1607.06520" target="_blank" class="rmbutton-orange" style="margin-top: 20px;">Debiasing Word Embeddings</a>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin8", offset: 250, duration: 1300})
+                          .setPin("#pin8")
+                          // .addIndicators({name: "8 (duration: 1300)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-1300"></div>
+            <!-- BOX 11 -->
+            <div id="pin11" class="box-me-1" style="padding: 0px; text-align: center; padding-bottom: 60px; padding-top: 60px;">
+               <img src="svgs/contextdata.png" alt="" style="width: 100%;" /><br/><br/>
+               <a href="https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4t8QB" target="_blank" class="rmbutton-orange">Datasheets for Datasets</a>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin11", offset: 250, duration: 1500})
+                          .setPin("#pin11")
+                          // .addIndicators({name: "11 (duration: 1500)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-2000"></div>
+            <!-- BOX 12 -->
+            <div id="pin12" class="box-me-1">
+               <h3>Debiasing Algorithms</h3>
+               <p class="para20">
+                  Interventions can be applied to a Language Model to directly offset their tendency to amplify bias. One way we can do this is to specify how predictions generated from the model should be fed back into it, in order to constrain the model. There are tools to ask and answer questions about models, features, and data points in Language Models to look out for any biases.
+               </p>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin12", offset: 250, duration: 3500})
+                          .setPin("#pin12")
+                          // .addIndicators({name: "12 (duration: 2500)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-500"></div>
+            <!-- BOX 15 -->
+            <div id="pin15" class="box-me-1">
+               <h3>Fair Predictive Policing</h3>
+               <p class="para20">
+                  Going back to our predictive policing example, instead of letting every newly observed crime instance be fed back into the algorithm, one can impose a sampling rule such that the more likely police are sent to a particular precinct, the less likely data observed from those assignments are incorporated into the algorithm. This helps prevent models from making predictions that  disproportionately fall to one particular group. 
+               </p>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin15", offset: 250, duration: 2500})
+                          .setPin("#pin15")
+                          // .addIndicators({name: "12 (duration: 2500)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+                  
+               </script>
+            </div>
+            <div class="spacer-1300"></div>
+            <!-- BOX 16 -->
+            <div id="pin16" class="box-me-1">
+               <h3>Evaluate for Fairness and Inclusion</h3>
+               <p class="para20">
+                  In addition to constraining predictions made by Language Models,  the model’s performance on a task should be evaluated with different groups and sub-groups e.g. males, females, white males,  white females etc., to catch any biases that might disproportionately fall to one particular group based on the models behaviour.
+               </p>
+               <a href="https://www.youtube.com/watch?v=XR8YSRcuVLE&list=PLoROMvodv4rOhcuXMZkNm7j3fVwBBY42z&index=19&ab_channel=stanfordonline" target="_blank" class="rmbutton-orange">Techniques for Bias Mitigation</a>
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin16", offset: 250, duration: 5500})
+                          .setPin("#pin16")
+                          // .addIndicators({name: "16 (duration: 5500)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+            <div class="spacer-1000"></div>
+            <!-- BOX 19 -->
+            <div id="pin19" class="box-me-1" style="padding:0;">
+               <img src="svgs/fairai.png" alt="" style="width:100%" />
+               <script>
+                  $(function () { // wait for document ready
+                  // build scene
+                  var scene = new ScrollMagic.Scene({triggerElement: "#pin19", offset: 250, duration: 2000})
+                          .setPin("#pin19")
+                          // .addIndicators({name: "19 (duration: 2000)"}) // add indicators (requires plugin)
+                          .addTo(controller);
+                  });
+                  
+               </script>
+            </div>
+         </div>
+      </div>
+      <div class="row" style="margin-top: 500px;">
+         <div class="col-md-2">
+         </div>
+         <div class="col-md-8">
+            <div class="box-me-1" style="text-align:center; margin-bottom: 100px; margin-top: 100px;">
+               <h3>Ethical Artificial Intelligence</h3>
+               <p class="para20">
+                  These are only a few ways that biases in AI systems and ML models can be mitigated. Though these practices may generate less ethically troubling results, they will not fix the underlying social injustices.
+                  But it is our responsibility to create AI systems that produce positive outcomes for all groups of people and our environment.
+               </p>
+               <a href="index.html" target="_blank" class="rmbutton-pink">Return to Home</a>
+            </div>
+         </div>
+         <div class="col-md-2">
+         </div>
+      </div>
+   </div>
+   <!-- Modal -->
+   <div class="modal fade" id="trymepink" tabindex="-1" aria-labelledby="tryme1Label" aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header" style="border-bottom: none;">
+               <h3 class="modal-title" id="tryme1Label"><b>You did it!</b></h3>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <p class="para20">Great work! You clicked on a pink button. These buttons will take show you more information.</p>
+            </div>
+            <div class="modal-footer" style="border-top: none; display: block;">
+               <a href="#" data-bs-dismiss="modal" class="rmbutton-pink">Continue</a>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- Modal -->
+   <div class="modal fade" id="trymepurple" tabindex="-1" aria-labelledby="tryme2Label" aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header" style="border-bottom: none;">
+               <h3 class="modal-title" id="tryme2Label"><b>You did it!</b></h3>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               <p class="para20">Great work! You clicked on a purple button. These buttons will take you to external resources.</p>
+            </div>
+            <div class="modal-footer" style="border-top: none; display: block;">
+               <a href="#" data-bs-dismiss="modal" class="rmbutton-orange">Continue</a>
+            </div>
+         </div>
+      </div>
+   </div>
+   <script src="./assets/dist/js/bootstrap.bundle.min.js"></script>
+   <!-- <script src=""></script> -->
+</body>
+</html>

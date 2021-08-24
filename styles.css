@@ -6,6 +6,20 @@
         scroll-behavior: smooth;
       }
 
+      
+.bg-blur {
+  background-color: rgba(255, 255, 255, 0.50) !important;
+}
+
+@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+  .bg-blur {
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+  }
+}
+
+
       p {
         color: black;
         font-family: 'Inter', 'Space Grotesk', Helvetica, sans-serif;
