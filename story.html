@@ -334,7 +334,7 @@
             <div class="spacer-500"></div>
             <!-- BOX 1 -->
             <div id="pin1" class="box-me-1">
-               <p class="para20">Scroll to follow how text data in the form of a prompt for Alexa travels through the Language Modelling pipeline, before Alexa can process and generate a response to it. </p>
+               <p class="para20">Scroll to follow how text data in the form of a prompt for Alexa travels through the Language Modelling pipeline before Alexa can process and generate a response to it. </p>
                <script>
                   $(function () { // wait for document ready
                   // build scene
@@ -406,7 +406,7 @@
                <p class="para20">
                   Language Models are first pre-trained on Big Data like Google News or Wikipedia. For example, GPT-3 was trained on 570GB of data. Language Models learn 'meaning' in this data and inherit any flaws, inconsistencies and biases captured in it.
                </p>
-               <a href="#" data-bs-toggle="modal" data-bs-target="#samplebias" class="rmbutton-orange">Sample Bias</a>
+               <a href="#" data-bs-toggle="modal" data-bs-target="#samplebias" class="rmbutton-pink">Sample Bias</a>
                <script>
                   $(function () { // wait for document ready
                   // build scene
@@ -1010,7 +1010,7 @@
             <div class="box-me-1" style="text-align:center; margin-bottom: 100px; margin-top: 100px;">
                <h3>Mitigating Bias</h3>
                <p class="para20">
-                  Now that we know how biases arise in the Language Model pipeline, how can we tackle them?
+                  Now that we know how biases arise in the Language Modelling pipeline, how can we tackle them?
                </p>
                <a href="biasmitigation.html" class="rmbutton-pink">Discover</a>
             </div>
@@ -1065,7 +1065,7 @@
                <p class="para20">Sample Bias can occur at this stage if the Big Data used to pre-train the Language Model over-represents or under-represents one group over another.
                </p>
                <p class="para20">
-                  Word Embeddings generated from a language model showed sample bias by predicting the word 'Homemaker' when used in an analogy task to complete the sentence "Man is to Computer Programmer as Woman is to _____?"
+                  Word Embeddings (numerical representations of words) generated from a language model showed sample bias by predicting the word 'Homemaker' when used in an analogy task to complete the sentence "Man is to Computer Programmer as Woman is to _____?"
                </p>
                <p class="para20">
                   In the data used to train the model, male computer programmers are overrepresented while male homemakers are underrepresented and vice versa for females.  This sampling bias promotes the gender stereotype that STEM occupations are typically occupied by men while caregiving and homemaking is typically a woman's job.
@@ -1087,7 +1087,7 @@
             </div>
             <div class="modal-body">
                <p class="para20">
-                  Historical bias can also at this stage if the data used to train the Language Model no longer accurately reflects the reality of the environment it will be used in.
+                  Historical bias can also occur at this stage if the data used to train the Language Model no longer accurately reflects the reality of the environment it will be used in.
                </p>
                <p class="para20">
                   A recruiting algorithm once used by Amazon was found to have disproportionately favoured male over female candidates as the data used to train the algorithm was based on resumes collected over a 10-year period. Because the tech industry was historically dominated by men, a majority of the resumes were submitted by men. Therefore, the dataset captured the inherent gender bias and passed it on to the recruiting algorithm, thus excluding women from the job opportunity.
@@ -1111,7 +1111,7 @@
                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-               <p>Try searching for 'Man' and then 'Woman' in the Word2vec word embeddings.</p>
+               <p> The Word2vec word embeddings projector visualised words that are most similar to a particular word of focus. Try searching for 'Man' and then 'Woman'. Notice the words that are associated with 'Man' e.g. 'commander' or 'manager', compared to the words associated with 'Woman' e.g 'virgin' or 'pregnant'. These are stereotypical associations based on gender. </p>
                <iframe class="post-content" width="100%" height="600" src="https://projector.tensorflow.org/" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
             </div>
             <div class="modal-footer" style="border-top: none; display: block;">
@@ -1190,7 +1190,7 @@
             </div>
             <div class="modal-body">
                <p class="para20">
-                  At this stage Language Models can amplify existing biases in the data. Given a few words as input, the model makes predictions on what words or phrases it should generate next. These predictions are fed back into the model as inputs for the next round of text generation predictions. This creates a runaway feedback loop.
+                  At this stage, Language Models can amplify existing biases in the data. Given a few words as input, the model makes predictions on what words or phrases it should generate next. These predictions are fed back into the model as inputs for the next round of text generation predictions. This creates a runaway feedback loop.
                </p>
             </div>
             <div class="modal-footer" style="border-top: none; display: block;">
